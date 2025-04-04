@@ -7,16 +7,11 @@ from eralchemy2 import render_er
 
 db = SQLAlchemy()
 
-#Favoritos
-class Favorite(db.Model):
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    people_id = Column(Integer, ForeignKey('people.id'), nullable=True)
-    planet_id = Column(Integer, ForeignKey('planet.id'), nullable=True)
-    vehicle_id = Column(Integer, ForeignKey('vehicle.id'), nullable=True)
 
 #Usuario
 class User(db.Model):
+    __tablename__= 'user'
+
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     name:  Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
@@ -42,6 +37,8 @@ class People(db.Model):
 
 #Planetas
 class Planet(db.Model):
+    __tablename__ = 'planet'
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     diameter: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -53,6 +50,7 @@ class Planet(db.Model):
 
 #Vehiculos
 class Vehicle(db.Model):
+    __tablename__ = 'vehicle'
     id: Mapped[int] = mapped_column(primary_key=True)
     model: Mapped[str] = mapped_column(String(120), nullable=False)
     vehicle_class: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -60,3 +58,19 @@ class Vehicle(db.Model):
     manufacturer: Mapped[str] = mapped_column(String(120), nullable=False)
 
     favorites: Mapped[list["Favorite"]] = relationship(back_populates= 'vehicle')
+
+#Favoritos
+class Favorite(db.Model):
+    __tablename__ = 'favorite'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    people_id = Column(Integer, ForeignKey('people.id'), nullable=True)
+    planet_id = Column(Integer, ForeignKey('planet.id'), nullable=True)
+    vehicle_id = Column(Integer, ForeignKey('vehicle.id'), nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="favorites")
+    people: Mapped["People | None"] = relationship(back_populates="favorites")
+    vehicle: Mapped["Vehicle | None"] = relationship(back_populates="favorites")
+    planet: Mapped["Planet | None"] = relationship(back_populates="favorites")
+
+render_er(db.Model, 'diagram.png')
